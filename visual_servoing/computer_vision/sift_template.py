@@ -70,6 +70,18 @@ def cd_sift_ransac(img, template):
         pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
 
         ########## YOUR CODE STARTS HERE ##########
+        if M is None:
+            x_min = y_min = x_max = y_max = 0
+        else:
+            # Project the four template corners into the destination image
+            dst = cv2.perspectiveTransform(pts, M)
+            dst = dst.reshape(-1, 2)  # (4, 2) array of (x, y) corner positions
+
+            # Derive axis-aligned bounding box from the projected corners
+            x_min = int(np.min(dst[:, 0]))
+            y_min = int(np.min(dst[:, 1]))
+            x_max = int(np.max(dst[:, 0]))
+            y_max = int(np.max(dst[:, 1]))
 
         x_min = y_min = x_max = y_max = 0
 
@@ -121,7 +133,16 @@ def cd_template_matching(img, template):
 
         # Remember to resize the bounding box using the highest scoring scale
         # x1,y1 pixel will be accurate, but x2,y2 needs to be correctly scaled
-        bounding_box = ((0, 0), (0, 0))
+        result = cv2.matchTemplate(img_canny, resized_template, cv2.TM_CCOEFF_NORMED)
+        _, score, _, max_loc = cv2.minMaxLoc(result)
+
+        if best_match is None or score > best_match[0]:
+            x1, y1 = max_loc
+            x2 = x1 + w
+            y2 = y1 + h
+            best_match = (score, ((x1, y1), (x2, y2)))
+
+        bounding_box = best_match[1]
         ########### YOUR CODE ENDS HERE ###########
 
     return bounding_box

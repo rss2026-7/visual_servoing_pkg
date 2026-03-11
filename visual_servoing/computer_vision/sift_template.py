@@ -77,13 +77,12 @@ def cd_sift_ransac(img, template):
             dst = cv2.perspectiveTransform(pts, M)
             dst = dst.reshape(-1, 2)  # (4, 2) array of (x, y) corner positions
 
-            # Derive axis-aligned bounding box from the projected corners
             x_min = int(np.min(dst[:, 0]))
             y_min = int(np.min(dst[:, 1]))
             x_max = int(np.max(dst[:, 0]))
             y_max = int(np.max(dst[:, 1]))
 
-        x_min = y_min = x_max = y_max = 0
+        # x_min = y_min = x_max = y_max = 0
 
         ########### YOUR CODE ENDS HERE ###########
 

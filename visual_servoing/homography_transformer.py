@@ -20,25 +20,23 @@ from vs_msgs.msg import ConeLocation, ConeLocationPixel
 # see README.md for coordinate frame description
 
 ######################################################
-# DUMMY POINTS -- ENTER YOUR MEASUREMENTS HERE
-PTS_IMAGE_PLANE = [[-1, -1],
-                   [-1, -1],
-                   [-1, -1],
-                   [-1, -1]]  # dummy points
+PTS_IMAGE_PLANE = [[211, 162],
+                   [415, 154],
+                   [351, 145],
+                   [402, 167]]
 ######################################################
 
-# PTS_GROUND_PLANE units are in inches
+# PTS_GROUND_PLANE units are in centimeters
 # car looks along positive x axis with positive y axis to left
 
 ######################################################
-# DUMMY POINTS -- ENTER YOUR MEASUREMENTS HERE
-PTS_GROUND_PLANE = [[-1, -1],
-                    [-1, -1],
-                    [-1, -1],
-                    [-1, -1]]  # dummy points
+PTS_GROUND_PLANE = [[30.48, 7.62],
+                    [46.99, -12.70],
+                    [109.22, -13.97],
+                    [22.86, -6.35]]
 ######################################################
 
-METERS_PER_INCH = 0.0254
+METERS_PER_CM = 0.01
 
 
 class HomographyTransformer(Node):
@@ -55,7 +53,7 @@ class HomographyTransformer(Node):
         # Initialize data into a homography matrix
 
         np_pts_ground = np.array(PTS_GROUND_PLANE)
-        np_pts_ground = np_pts_ground * METERS_PER_INCH
+        np_pts_ground = np_pts_ground * METERS_PER_CM
         np_pts_ground = np.float32(np_pts_ground[:, np.newaxis, :])
 
         np_pts_image = np.array(PTS_IMAGE_PLANE)

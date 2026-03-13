@@ -30,6 +30,9 @@ class ParkingController(Node):
         self.parking_distance = .75  # meters; try playing with this number!
         self.relative_x = 0
         self.relative_y = 0
+        
+        self.prev_angle_to_cone = None
+        self.prev_time_sec = None
 
         self.get_logger().info("Parking Controller Initialized")
 
@@ -41,8 +44,42 @@ class ParkingController(Node):
         #################################
 
         # YOUR CODE HERE
-        # Use relative position and your control law to set drive_cmd
+        # handle misaligned angle
+        angle_to_cone = np.arctan2(self.relative_y, self.relative_x)
+        distance_to_cone = np.hypot(self.relative_x, self.relative_y)
 
+        # compute the derivative of the angle error
+        now_sec = self.get_clock().now().nanoseconds * 1e-9
+        if self.prev_time_sec is None or self.prev_angle_to_cone is None:
+            derror = 0.0
+        else:
+            dt = max(now_sec - self.prev_time_sec, 1e-3)
+            derror = (angle_to_cone - self.prev_angle_to_cone) / dt
+
+        # PD controller on angle error (angle_to_cone)
+        k_p_steer = 1.0
+        k_d_steer = 0.1
+        steering_cmd = k_p_steer * angle_to_cone - k_d_steer * derror
+        steering_angle = float(np.clip(steering_cmd, -0.34, 0.34))
+
+        # update the previous angle and time
+        self.prev_angle_to_cone = angle_to_cone
+        self.prev_time_sec = now_sec
+
+        # P controller on distance error (distance_to_cone)
+        if distance_to_cone > self.parking_distance:
+            speed = float(np.clip(0.5 * distance_to_cone, 0.2, 3.0))
+            drive_cmd.drive.speed = speed
+            drive_cmd.drive.steering_angle = steering_angle
+        else:
+            drive_cmd.drive.speed = 0.0
+            drive_cmd.drive.steering_angle = 0.0
+
+        # self.get_logger().info(
+        #     f"x={self.relative_x:.2f} y={self.relative_y:.2f} "
+        #     f"angle={angle_to_cone:.3f} dist={distance_to_cone:.2f} "
+        #     f"steer={steering_angle:.3f} speed={drive_cmd.drive.speed:.2f}"
+        # )
         #################################
 
         self.drive_pub.publish(drive_cmd)
@@ -59,7 +96,9 @@ class ParkingController(Node):
 
         # YOUR CODE HERE
         # Populate error_msg with relative_x, relative_y, sqrt(x^2+y^2)
-
+        error_msg.x_error = float(self.relative_x)
+        error_msg.y_error = float(self.relative_y)
+        error_msg.distance_error = float(np.sqrt(self.relative_x**2 + self.relative_y**2))
         #################################
 
         self.error_pub.publish(error_msg)

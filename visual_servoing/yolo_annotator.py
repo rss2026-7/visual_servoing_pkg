@@ -191,14 +191,7 @@ class YoloAnnotatorNode(Node):
             cv2.putText(out_image, label, (det.x1, det.y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-            thickness = 2
-            start_point = (det.x1,det.y1)
-            end_point = (det.x2, det.y2)
-            color = self.class_color_map(det.class_name)
-
-            cv2.rectangle(), start_point, end_point, color, thickness)
-
-            
+                        
         return out_image
 
 

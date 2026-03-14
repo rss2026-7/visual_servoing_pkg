@@ -62,6 +62,8 @@ class ConeDetector(Node):
         msg.u = x 
         msg.v = y
 
+        self.cone_pub.publish(msg)
+
         debug_msg = self.bridge.cv2_to_imgmsg(image, "bgr8")
         self.debug_pub.publish(debug_msg)
 

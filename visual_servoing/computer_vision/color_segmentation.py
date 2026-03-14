@@ -28,6 +28,8 @@ def preprocess(img, template):
     """
     Preprocess image to eliminate outliers and smooth corners
     """
+    img = cv.GaussianBlur(img, (5,5), 0)
+
     return img
 
 
@@ -38,7 +40,7 @@ def get_mask(img):
 
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
-    low = np.array([0, 180, 180])
+    low = np.array([5, 220, 100])
     high = np.array([30, 255, 255])
 
     mask = cv.inRange(hsv, low, high)
@@ -53,16 +55,29 @@ def get_bounding_box(mask):
     """
     
     
-    contours, hiearchy = cv.findContours(mask, 1, 2)
+    contours, hiearchy = cv.findContours(
+        mask,
+        cv.RETR_EXTERNAL,
+        cv.CHAIN_APPROX_SIMPLE
+    )
 
-    cnt = max(contours, key=cv.contourArea)
+    def rect_area(cnt):
+        _,_,w,h = cv.boundingRect(cnt) 
+        return w * h
+
+
+    cnt = max(contours, key=rect_area)
     # find the largest contour
 
     x,y,w,h = cv.boundingRect(cnt) 
 
-    # cv.rectangle(mask,(x,y),(x+w,y+h),(0,255,0),2)
+    debug_img = mask.copy()
+
     
-    # image_print(mask)
+    (x1, y1), (x2, y2) = ((x, y), (x + w, y + h))
+    cv.rectangle(debug_img, (x1, y1), (x2, y2), (0,0,255), 2)
+ 
+    # image_print(debug_img)
 
     return (x, y, x+w, y+h)
 
@@ -81,17 +96,24 @@ def cd_color_segmentation(img, template):
     ########## YOUR CODE STARTS HERE ##########
 
 
+    img = preprocess(img, template)
 
     mask = get_mask(img)
 
     # masked_img = cv.bitwise_and(img, img, mask=mask)
-
+    
     # image_print(mask)
     # image_print(masked_img)
 
     x1,y1,x2,y2 = get_bounding_box(mask)
 
     bounding_box = ((x1, y1), (x2, y2))
+
+
+    debug_img = img.copy()
+    cv.rectangle(debug_img, (x1, y1), (x2, y2), (0,0,255), 2)
+ 
+    image_print(debug_img)
 
 
     ########### YOUR CODE ENDS HERE ###########

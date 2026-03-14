@@ -81,8 +81,8 @@ class YoloAnnotatorNode(Node):
         #       COCO class names to detect and their corresponding colors
         #       in the annotated image.
         return {
-            "chair": (255, 0, 0),
-            "dining table": (0, 255, 0),
+            "couch": (255, 0, 0),
+            "laptop": (0, 255, 0),
         }
 
     def on_image(self, msg: Image) -> None:
@@ -148,6 +148,18 @@ class YoloAnnotatorNode(Node):
         #       detections List.
         #
         # Hint: use Python's zip keyword to iterate through the three arrays in a single for loop.
+      
+        for box, conf_val, cls_val in zip(xyxy_np, conf_np, cls_np):
+            detection = Detection(
+                class_id = int(cls_val),
+                class_name = self.model.names[int(cls_val)], # extract names based on IDs
+                confidence =float(conf_val),
+                x1 =int(box[0]),
+                y1 = int(box[1]),
+                x2 =int(box[2]),
+                y2 = int(box[3])
+            )
+            detections.append(detection)
 
         return detections
 
@@ -161,18 +173,32 @@ class YoloAnnotatorNode(Node):
 
         for det in detections:
             # TODO: Get the bounding box for the detection
+            start_point = (det.x1, det.y1)
+            end_point = (det.x2, det.y2)
 
             # TODO: Draw the bounding box around the detection to the output image.
             #       Use the colors you specified per class in `get_class_color_map`
             #       by accessing the self.class_color_map dictionary.
             #
             # Hint: Use cv2's `rectangle` function to draw a rectangle on the annotated image.
+            color = self.class_color_map[det.class_name]
+            cv2.rectangle(out_image, start_point, end_point, color, 2)
 
             # TODO: Label the box with the class name and confidence.
             #
             # Hint: Use cv2's `putText` function to put text on the annotated image.
-            raise NotImplementedError
+            label = f"{det.class_name} {det.confidence}" # maybe need to round confidence, we'll see
+            cv2.putText(out_image, label, (det.x1, det.y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
+            thickness = 2
+            start_point = (det.x1,det.y1)
+            end_point = (det.x2, det.y2)
+            color = self.class_color_map(det.class_name)
+
+            cv2.rectangle(), start_point, end_point, color, thickness)
+
+            
         return out_image
 
 

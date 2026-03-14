@@ -113,7 +113,7 @@ def cd_color_segmentation(img, template):
     debug_img = img.copy()
     cv.rectangle(debug_img, (x1, y1), (x2, y2), (0,0,255), 2)
  
-    image_print(debug_img)
+    # image_print(debug_img)
 
 
     ########### YOUR CODE ENDS HERE ###########

@@ -187,7 +187,7 @@ class YoloAnnotatorNode(Node):
             # TODO: Label the box with the class name and confidence.
             #
             # Hint: Use cv2's `putText` function to put text on the annotated image.
-            label = f"{det.class_name} {det.confidence}" # maybe need to round confidence, we'll see
+            label = f"{det.class_name} {det.confidence:.3g}" # maybe need to round confidence, we'll see
             cv2.putText(out_image, label, (det.x1, det.y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 

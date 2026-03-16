@@ -83,7 +83,7 @@ def get_bounding_box(mask):
 
 
 
-def cd_color_segmentation(img, template):
+def cd_color_segmentation(img, template=None):
     """
     Implement the cone detection using color segmentation algorithm
     Input:
@@ -110,8 +110,7 @@ def cd_color_segmentation(img, template):
     bounding_box = ((x1, y1), (x2, y2))
 
 
-    debug_img = img.copy()
-    cv.rectangle(debug_img, (x1, y1), (x2, y2), (0,0,255), 2)
+    cv.rectangle(image, (x1, y1), (x2, y2), (0,0,255), 2)
  
     # image_print(debug_img)
 

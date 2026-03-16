@@ -196,7 +196,7 @@ class YoloAnnotatorNode(Node):
             end_point = (det.x2, det.y2)
             color = self.class_color_map(det.class_name)
 
-            cv2.rectangle(), start_point, end_point, color, thickness)
+            cv2.rectangle(out_image, start_point, end_point, color, thickness)
 
             
         return out_image

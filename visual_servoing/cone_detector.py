@@ -59,8 +59,8 @@ class ConeDetector(Node):
         x, y = (x1 + x2)/2, y2
 
         msg = ConeLocationPixel()
-        msg.u = x 
-        msg.v = y
+        msg.u = float(x)
+        msg.v = float(y)
 
         self.cone_pub.publish(msg)
 

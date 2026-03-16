@@ -47,6 +47,7 @@ class ParkingController(Node):
         # handle misaligned angle
         angle_to_cone = np.arctan2(self.relative_y, self.relative_x)
         distance_to_cone = np.hypot(self.relative_x, self.relative_y)
+        distance_error = distance_to_cone - self.parking_distance
 
         # compute the derivative of the angle error
         now_sec = self.get_clock().now().nanoseconds * 1e-9
@@ -66,14 +67,21 @@ class ParkingController(Node):
         self.prev_angle_to_cone = angle_to_cone
         self.prev_time_sec = now_sec
 
-        # P controller on distance error (distance_to_cone)
-        if distance_to_cone > self.parking_distance:
-            speed = float(np.clip(0.5 * distance_to_cone, 0.2, 3.0))
+        # P controller on distance error: positive = too far, negative = too close
+        jitter_distance = 0.1
+        jitter_angle = 0.05
+        angle_error = np.abs(angle_to_cone)
+        if abs(distance_error) < jitter_distance and angle_error < jitter_angle:
+            drive_cmd.drive.speed = 0.0
+            drive_cmd.drive.steering_angle = 0.0
+        elif distance_error > 0:
+            speed = float(np.clip(0.5 * distance_error, 0.2, 1.0))
             drive_cmd.drive.speed = speed
             drive_cmd.drive.steering_angle = steering_angle
         else:
-            drive_cmd.drive.speed = 0.0
-            drive_cmd.drive.steering_angle = 0.0
+            speed = float(np.clip(0.5 * distance_error, -1.0, -0.2))
+            drive_cmd.drive.speed = speed
+            drive_cmd.drive.steering_angle = -steering_angle
 
         # self.get_logger().info(
         #     f"x={self.relative_x:.2f} y={self.relative_y:.2f} "

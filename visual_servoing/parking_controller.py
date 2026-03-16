@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import os
+import csv
+from datetime import datetime
+
 import rclpy
 from rclpy.node import Node
 import numpy as np
@@ -34,6 +38,17 @@ class ParkingController(Node):
         self.prev_angle_to_cone = None
         self.prev_time_sec = None
 
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        csv_path = os.path.join(os.getcwd(), f"parking_run_{timestamp}.csv")
+        self._csv_file = open(csv_path, "w", newline="")
+        self._csv_writer = csv.writer(self._csv_file)
+        self._csv_writer.writerow([
+            "time_sec", "relative_x", "relative_y",
+            "distance_to_cone", "distance_error", "angle_to_cone",
+            "derror", "steering_angle", "speed",
+            "Kp_steer", "Kd_steer",
+        ])
+        self.get_logger().info(f"Logging to {csv_path}")
         self.get_logger().info("Parking Controller Initialized")
 
     def relative_cone_callback(self, msg):
@@ -89,6 +104,15 @@ class ParkingController(Node):
         #     f"steer={steering_angle:.3f} speed={drive_cmd.drive.speed:.2f}"
         # )
         #################################
+
+        self._csv_writer.writerow([
+            f"{now_sec:.4f}", f"{self.relative_x:.4f}", f"{self.relative_y:.4f}",
+            f"{distance_to_cone:.4f}", f"{distance_error:.4f}", f"{angle_to_cone:.4f}",
+            f"{derror:.4f}", f"{drive_cmd.drive.steering_angle:.4f}",
+            f"{drive_cmd.drive.speed:.4f}",
+            f"{k_p_steer}", f"{k_d_steer}",
+        ])
+        self._csv_file.flush()
 
         self.drive_pub.publish(drive_cmd)
         self.error_publisher()

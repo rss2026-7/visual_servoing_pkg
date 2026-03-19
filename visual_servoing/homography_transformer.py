@@ -13,12 +13,13 @@ from ackermann_msgs.msg import AckermannDriveStamped
 from visualization_msgs.msg import Marker
 from vs_msgs.msg import ConeLocation, ConeLocationPixel
 
-# The following collection of pixel locations and corresponding relative
-# ground plane locations are used to compute our homography matrix
+# Homography calibration: each PTS_IMAGE_PLANE[i] must correspond to PTS_GROUND_PLANE[i].
+# Place an object on the ground at a known position, note its bottom-center pixel [u, v]
+# in the camera image AND measure its physical [x, y] from the car.
+# Spread points across near/far and left/right for a good fit.
 
-# PTS_IMAGE_PLANE units are in pixels
-# see README.md for coordinate frame description
-
+# [u, v] pixel coordinates in the camera image.
+# Origin is top-left of image. u increases rightward, v increases downward.
 ######################################################
 PTS_IMAGE_PLANE = [[211, 162],
                    [415, 154],
@@ -26,9 +27,9 @@ PTS_IMAGE_PLANE = [[211, 162],
                    [402, 167]]
 ######################################################
 
-# PTS_GROUND_PLANE units are in centimeters
-# car looks along positive x axis with positive y axis to left
-
+# [x, y] real-world position in centimeters, relative to the car.
+# +x = forward (direction the car faces), +y = left of the car.
+# Negative y = to the right of the car.
 ######################################################
 PTS_GROUND_PLANE = [[30.48, 7.62],
                     [46.99, -12.70],
